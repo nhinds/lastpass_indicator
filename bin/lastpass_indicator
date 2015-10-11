@@ -1,0 +1,4 @@
+#!/usr/bin/env ruby
+
+require 'lastpass_indicator'
+LastPassIndicator.run
