@@ -7,7 +7,7 @@ module LastPassIndicator
       @menu = Menu.new(@config)
       @menu.on_account do |selected_account|
         puts "Asked for #{selected_account}"
-        retrieve_vault do |vault|
+        with_vault do |vault|
           accounts = vault.accounts.select { |account| account.id == selected_account[:id] }
           if accounts.any?
             account = accounts.first
@@ -18,13 +18,14 @@ module LastPassIndicator
         end
       end
       @menu.on_other do
-        puts 'Dunno, pick one:'
-        retrieve_vault do |vault|
-          vault.accounts.each do |account|
-            puts "#{account.id} - #{account.name} (#{account.username})"
+        with_vault do |vault|
+          account_window = AccountWindow.new(vault)
+          account_window.on_select do |account|
+            PasswordOutput.write_password account
           end
         end
       end
+      @menu.on_configure { puts 'TODO' }
     end
 
     def run
@@ -38,13 +39,13 @@ module LastPassIndicator
     # Prompts for username (if required) and password - asynchronously with a GTK dialog
     # Retrieves the encrypted blob from LastPass (if required) - asynchronously on a non-GTK thread
     # Yields the decrypted vault to the given block - back in the GTK main loop
-    def retrieve_vault(&block)
-      # TODO: cache blob so we don't have to talk to LastPass every time
-      login_window = LoginWindow.new(@config)
+    def with_vault(&block)
+      login_window = LoginWindow.new(@config, reprompt: !@blob.nil?)
       login_window.on_login do |username, password|
         Thread.start do
           begin
-            vault = LastPass::Vault.open_remote username, password
+            @blob ||= LastPass::Vault.fetch_blob username, password
+            vault = LastPass::Vault.open @blob, username, password
             idle do
               login_window.finished(true)
               block.call(vault)

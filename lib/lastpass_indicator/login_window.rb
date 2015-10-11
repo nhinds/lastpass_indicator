@@ -2,16 +2,18 @@ require 'gtk2'
 
 module LastPassIndicator
   class LoginWindow
+    # TODO: rewrite with a builder / glade file?
     def initialize(config, reprompt: false)
       @config = config
       @reprompt = reprompt
       @dialog = Gtk::Dialog.new(@reprompt ? 'Password Reprompt' : 'Login')
+      @dialog.resizable = false
 
-      # TODO: don't do this if it's a reprompt? (reprompt not yet implemented so... care later)
       username_label = Gtk::Label.new 'Username'
       @username = Gtk::Entry.new
       @username.text = @config.username if @config.username
       @username.signal_connect('changed') { update_sensitivity }
+      [username_label, @username].each { |widget| widget.no_show_all = reprompt }
 
       password_label = Gtk::Label.new 'Password'
       @password = Gtk::Entry.new
@@ -20,9 +22,9 @@ module LastPassIndicator
       @password.signal_connect('changed') { update_sensitivity }
 
       table = Gtk::Table.new(2, 2)
-      table.attach(username_label, 0, 1, 0, 1, nil)
+      table.attach(username_label, 0, 1, 0, 1, 0)
       table.attach(@username, 1, 2, 0, 1)
-      table.attach(password_label, 0, 1, 1, 2, nil)
+      table.attach(password_label, 0, 1, 1, 2, 0)
       table.attach(@password, 1, 2, 1, 2)
       table.row_spacings = 5
       table.column_spacings = 5
