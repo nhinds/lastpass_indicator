@@ -1,4 +1,5 @@
 require 'gtk2'
+require 'timers'
 
 module LastPassIndicator
   class LoginWindow
@@ -21,11 +22,14 @@ module LastPassIndicator
       @password.activates_default = true
       @password.signal_connect('changed') { update_sensitivity }
 
-      table = Gtk::Table.new(2, 2)
+      @remember = Gtk::CheckButton.new 'Rememer Password for 5 minutes'
+
+      table = Gtk::Table.new(2, 3)
       table.attach(username_label, 0, 1, 0, 1, 0)
       table.attach(@username, 1, 2, 0, 1)
       table.attach(password_label, 0, 1, 1, 2, 0)
       table.attach(@password, 1, 2, 1, 2)
+      table.attach(@remember, 1, 3, 2, 3)
       table.row_spacings = 5
       table.column_spacings = 5
       table.border_width = 5
@@ -42,13 +46,19 @@ module LastPassIndicator
       @dialog.signal_connect('response') { |_, response| done(response) }
       @dialog.default_response = Gtk::Dialog::RESPONSE_ACCEPT
 
-      update_sensitivity
-      @password.grab_focus if @config.username
-      @dialog.show_all
+      unless @@password_text ||= nil
+        update_sensitivity
+        @password.grab_focus if @config.username
+        @dialog.show_all
+      end
     end
 
     def on_login(&block)
       @login_handler = block
+
+      if @@password_text
+        done Gtk::Dialog::RESPONSE_ACCEPT
+      end
     end
 
     def finished(success)
@@ -69,7 +79,13 @@ module LastPassIndicator
         update_sensitivity(sensitive: false, fields: true)
         @spinner.start
         @spinner.show
-        @login_handler.call(@config.username, @password.text)
+        @login_handler.call(@config.username,  @@password_text || @password.text)
+
+        if @remember.active?
+          @@password_text = @password.text
+          @@timers ||= Timers::Group.new
+          @@timers.after(5 * 60) { @@password_text = nil }
+        end
       else
         @dialog.destroy
       end
