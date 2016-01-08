@@ -18,11 +18,10 @@ Gem::Specification.new do |spec|
   spec.test_files    = spec.files.grep(%r{^(test|spec|features)/})
   spec.require_paths = ['lib']
 
-  # spec.add_dependency 'ruby-libappindicator'
+  spec.add_dependency 'ruby-libappindicator'
   spec.add_dependency 'lastpass'
   spec.add_dependency 'xdg'
   spec.add_dependency 'xdo'
-  spec.add_dependency 'x11_client'
 
   spec.add_development_dependency 'bundler', '~> 1.7'
   spec.add_development_dependency 'rake', '~> 10.0'

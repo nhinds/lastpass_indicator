@@ -10,12 +10,12 @@ module LastPassIndicator
                                                   'lastpass_indicator',
                                                   AppIndicator::Category::APPLICATION_STATUS,
                                                   THEME_PATH)
-      @indicator.status = AppIndicator::Status::ACTIVE
+      @indicator.set_status AppIndicator::Status::ACTIVE
       rebuild_menu
     end
 
     def rebuild_menu
-      @indicator.menu = Gtk::Menu.new.tap do |menu|
+      @indicator.set_menu(Gtk::Menu.new.tap do |menu|
         @config.accounts.sort_by { |account| account[:name] }.each do |account|
           menu.append menu_item(account_name(account)) { @account_handler.call(account) }
         end
@@ -26,7 +26,7 @@ module LastPassIndicator
         menu.append menu_item('Quit') { Gtk.main_quit }
 
         menu.show_all
-      end
+      end)
     end
 
     [:account, :other, :configure].each do |handler|
