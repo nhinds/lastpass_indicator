@@ -1,5 +1,4 @@
 require 'gtk2'
-require 'timers'
 
 module LastPassIndicator
   class LoginWindow
@@ -22,7 +21,7 @@ module LastPassIndicator
       @password.activates_default = true
       @password.signal_connect('changed') { update_sensitivity }
 
-      @remember = Gtk::CheckButton.new 'Rememer Password for 5 minutes'
+      @remember = Gtk::CheckButton.new 'Remember Password for 5 minutes'
 
       table = Gtk::Table.new(2, 3)
       table.attach(username_label, 0, 1, 0, 1, 0)
@@ -46,19 +45,13 @@ module LastPassIndicator
       @dialog.signal_connect('response') { |_, response| done(response) }
       @dialog.default_response = Gtk::Dialog::RESPONSE_ACCEPT
 
-      unless @@password_text ||= nil
-        update_sensitivity
-        @password.grab_focus if @config.username
-        @dialog.show_all
-      end
+      update_sensitivity
+      @password.grab_focus if @config.username
+      @dialog.show_all
     end
 
     def on_login(&block)
       @login_handler = block
-
-      if @@password_text
-        done Gtk::Dialog::RESPONSE_ACCEPT
-      end
     end
 
     def finished(success)
@@ -79,13 +72,7 @@ module LastPassIndicator
         update_sensitivity(sensitive: false, fields: true)
         @spinner.start
         @spinner.show
-        @login_handler.call(@config.username,  @@password_text || @password.text)
-
-        if @remember.active?
-          @@password_text = @password.text
-          @@timers ||= Timers::Group.new
-          @@timers.after(5 * 60) { @@password_text = nil }
-        end
+        @login_handler.call(@config.username, @password.text, @remember.active?)
       else
         @dialog.destroy
       end
@@ -93,7 +80,7 @@ module LastPassIndicator
 
     def update_sensitivity(sensitive: !@username.text.empty? && !@password.text.empty?, fields: false)
       @dialog.set_response_sensitive(Gtk::Dialog::RESPONSE_ACCEPT, sensitive)
-      [@username, @password].each { |field| field.sensitive = sensitive } if fields
+      [@username, @password, @remember].each { |field| field.sensitive = sensitive } if fields
     end
   end
 end
