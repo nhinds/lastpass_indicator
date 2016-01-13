@@ -23,12 +23,12 @@ module LastPassIndicator
 
       @remember = Gtk::CheckButton.new 'Remember Password for 5 minutes'
 
-      table = Gtk::Table.new(2, 3)
+      table = Gtk::Table.new(3, 2)
       table.attach(username_label, 0, 1, 0, 1, 0)
       table.attach(@username, 1, 2, 0, 1)
       table.attach(password_label, 0, 1, 1, 2, 0)
       table.attach(@password, 1, 2, 1, 2)
-      table.attach(@remember, 1, 3, 2, 3)
+      table.attach(@remember, 1, 2, 2, 3)
       table.row_spacings = 5
       table.column_spacings = 5
       table.border_width = 5
