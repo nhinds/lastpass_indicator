@@ -1,8 +1,11 @@
 require 'lastpass'
+require 'active_support/core_ext/numeric/time'
+require 'timers'
 
 module LastPassIndicator
   class Main
     def initialize
+      @timers = Timers::Group.new
       @config = Config.new
       @menu = Menu.new(@config)
       @menu.on_account do |selected_account|
@@ -40,12 +43,21 @@ module LastPassIndicator
     # Retrieves the encrypted blob from LastPass (if required) - asynchronously on a non-GTK thread
     # Yields the decrypted vault to the given block - back in the GTK main loop
     def with_vault(&block)
+      # Short circuit all of this if the vault has been kept open
+      return block.call(@vault) if @vault
+
       login_window = LoginWindow.new(@config, reprompt: !@blob.nil?)
-      login_window.on_login do |username, password|
+      login_window.on_login do |username, password, remember|
         Thread.start do
           begin
             @blob ||= LastPass::Vault.fetch_blob username, password
             vault = LastPass::Vault.open @blob, username, password
+
+            if remember
+              @vault = vault
+              @timers.after(5.minutes) { @vault = nil }
+            end
+
             idle do
               login_window.finished(true)
               block.call(vault)

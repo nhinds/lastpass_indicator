@@ -21,11 +21,14 @@ module LastPassIndicator
       @password.activates_default = true
       @password.signal_connect('changed') { update_sensitivity }
 
-      table = Gtk::Table.new(2, 2)
+      @remember = Gtk::CheckButton.new 'Remember Password for 5 minutes'
+
+      table = Gtk::Table.new(3, 2)
       table.attach(username_label, 0, 1, 0, 1, 0)
       table.attach(@username, 1, 2, 0, 1)
       table.attach(password_label, 0, 1, 1, 2, 0)
       table.attach(@password, 1, 2, 1, 2)
+      table.attach(@remember, 1, 2, 2, 3)
       table.row_spacings = 5
       table.column_spacings = 5
       table.border_width = 5
@@ -69,7 +72,7 @@ module LastPassIndicator
         update_sensitivity(sensitive: false, fields: true)
         @spinner.start
         @spinner.show
-        @login_handler.call(@config.username, @password.text)
+        @login_handler.call(@config.username, @password.text, @remember.active?)
       else
         @dialog.destroy
       end
@@ -77,7 +80,7 @@ module LastPassIndicator
 
     def update_sensitivity(sensitive: !@username.text.empty? && !@password.text.empty?, fields: false)
       @dialog.set_response_sensitive(Gtk::Dialog::RESPONSE_ACCEPT, sensitive)
-      [@username, @password].each { |field| field.sensitive = sensitive } if fields
+      [@username, @password, @remember].each { |field| field.sensitive = sensitive } if fields
     end
   end
 end
