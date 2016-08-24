@@ -1,5 +1,6 @@
 require 'xdg'
 require 'yaml'
+require 'lastpass_indicator/event_publisher'
 
 module LastPassIndicator
   class ConfigDir
@@ -11,8 +12,10 @@ module LastPassIndicator
   end
 
   class Config
+    extend EventPublisher
+    event :save
+
     def initialize
-      @save_handlers = []
       @dir = ConfigDir.new
       config_file = @dir.config.find('account.yaml')
       if config_file
@@ -40,10 +43,6 @@ module LastPassIndicator
       save
     end
 
-    def on_save(&block)
-      @save_handlers << block
-    end
-
     private
 
     def save
@@ -51,7 +50,7 @@ module LastPassIndicator
       File.open(config_file, 'w') do |file|
         file.write(@config.to_yaml)
       end
-      @save_handlers.each { |handler| handler.call }
+      publish_save
     end
   end
 end

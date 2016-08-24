@@ -1,7 +1,11 @@
 require 'gtk2'
+require 'lastpass_indicator/event_publisher'
 
 module LastPassIndicator
   class LoginWindow
+    extend EventPublisher
+    event :login
+
     # TODO: rewrite with a builder / glade file?
     def initialize(config, reprompt: false)
       @config = config
@@ -50,10 +54,6 @@ module LastPassIndicator
       @dialog.show_all
     end
 
-    def on_login(&block)
-      @login_handler = block
-    end
-
     def finished(success)
       if success
         @dialog.destroy
@@ -72,7 +72,7 @@ module LastPassIndicator
         update_sensitivity(sensitive: false, fields: true)
         @spinner.start
         @spinner.show
-        @login_handler.call(@config.username, @password.text, @remember.active?)
+        publish_login(@config.username, @password.text, @remember.active?)
       else
         @dialog.destroy
       end

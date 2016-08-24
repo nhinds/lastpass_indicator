@@ -1,6 +1,10 @@
+require 'lastpass_indicator/event_publisher'
 
 module LastPassIndicator
   class AccountWindow
+    extend EventPublisher
+    event :select
+
     def initialize(vault)
       @vault = vault
       @dialog = Gtk::Dialog.new('Accounts', nil, nil,
@@ -35,10 +39,6 @@ module LastPassIndicator
       @dialog.show_all
     end
 
-    def on_select(&block)
-      @select_handler = block
-    end
-
     private
 
     ACCOUNT_COL = 0
@@ -47,7 +47,7 @@ module LastPassIndicator
     def done(response)
       if response == Gtk::Dialog::RESPONSE_ACCEPT
         selected_row = @treeview.selection.selected
-        @select_handler.call(selected_row[0]) unless selected_row.nil?
+        publish_select(selected_row[0]) unless selected_row.nil?
       end
       @dialog.destroy
     end

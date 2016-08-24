@@ -1,7 +1,11 @@
 require 'ruby-libappindicator'
+require 'lastpass_indicator/event_publisher'
 
 module LastPassIndicator
   class Menu
+    extend EventPublisher
+    events :account, :other, :configure
+
     def initialize(config)
       @config = config
       # FIXME: directory and license of icon file
@@ -18,20 +22,16 @@ module LastPassIndicator
     def rebuild_menu
       @indicator.set_menu(Gtk::Menu.new.tap do |menu|
         @config.accounts.sort_by { |account| account[:name] }.each do |account|
-          menu.append menu_item(account_name(account)) { @account_handler.call(account) }
+          menu.append menu_item(account_name(account)) { publish_account(account) }
         end
-        menu.append menu_item('Other...') { @other_handler.call }
+        menu.append menu_item('Other...') { publish_other }
 
         menu.append Gtk::SeparatorMenuItem.new
-        menu.append menu_item('Configure') { @configure_handler.call }
+        menu.append menu_item('Configure') { publish_configure }
         menu.append menu_item('Quit') { Gtk.main_quit }
 
         menu.show_all
       end)
-    end
-
-    [:account, :other, :configure].each do |handler|
-      define_method(:"on_#{handler}") { |&block| instance_variable_set :"@#{handler}_handler", block }
     end
 
     private
