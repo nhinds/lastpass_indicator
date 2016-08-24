@@ -1,11 +1,9 @@
 require 'lastpass'
 require 'active_support/core_ext/numeric/time'
-require 'timers'
 
 module LastPassIndicator
   class Main
     def initialize
-      @timers = Timers::Group.new
       @config = Config.new
       @menu = Menu.new(@config)
       @menu.on_account do |selected_account|
@@ -59,7 +57,7 @@ module LastPassIndicator
 
             if remember
               @vault = vault
-              @timers.after(5.minutes) { @vault = nil }
+              Gtk.timeout_add(5.minutes.in_milliseconds) { @vault = nil }
             end
 
             idle do

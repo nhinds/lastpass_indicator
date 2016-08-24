@@ -21,7 +21,6 @@ Gem::Specification.new do |spec|
   spec.add_dependency 'activesupport'
   spec.add_dependency 'ruby-libappindicator'
   spec.add_dependency 'lastpass'
-  spec.add_dependency 'timers'
   spec.add_dependency 'xdg'
   spec.add_dependency 'xdo'
 
