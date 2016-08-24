@@ -11,6 +11,7 @@ module LastPassIndicator
                                                   AppIndicator::Category::APPLICATION_STATUS,
                                                   THEME_PATH)
       @indicator.set_status AppIndicator::Status::ACTIVE
+      @config.on_save { rebuild_menu }
       rebuild_menu
     end
 

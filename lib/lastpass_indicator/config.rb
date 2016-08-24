@@ -12,6 +12,7 @@ module LastPassIndicator
 
   class Config
     def initialize
+      @save_handlers = []
       @dir = ConfigDir.new
       config_file = @dir.config.find('account.yaml')
       if config_file
@@ -39,6 +40,10 @@ module LastPassIndicator
       save
     end
 
+    def on_save(&block)
+      @save_handlers << block
+    end
+
     private
 
     def save
@@ -46,6 +51,7 @@ module LastPassIndicator
       File.open(config_file, 'w') do |file|
         file.write(@config.to_yaml)
       end
+      @save_handlers.each { |handler| handler.call }
     end
   end
 end

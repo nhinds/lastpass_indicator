@@ -28,7 +28,11 @@ module LastPassIndicator
           end
         end
       end
-      @menu.on_configure { puts 'TODO' }
+      @menu.on_configure do
+        with_vault do |vault|
+          ConfigWindow.new(@config, vault)
+        end
+      end
     end
 
     def run

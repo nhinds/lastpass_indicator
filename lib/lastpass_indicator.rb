@@ -1,5 +1,6 @@
 require 'lastpass_indicator/account_window'
 require 'lastpass_indicator/config'
+require 'lastpass_indicator/config_window'
 require 'lastpass_indicator/login_window'
 require 'lastpass_indicator/main'
 require 'lastpass_indicator/menu'
