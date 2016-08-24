@@ -62,7 +62,7 @@ module LastPassIndicator
               login_window.finished(true)
               block.call(vault)
             end
-          rescue LastPass::Error => e
+          rescue LastPass::Error, OpenSSL::OpenSSLError => e
             # TODO: handle multifactor prompts (maybe handle duo magic)
             error_dialog "Error logging into LastPass: #{e.message}"
             idle { login_window.finished(false) }
