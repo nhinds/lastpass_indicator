@@ -10,7 +10,10 @@ module LastPassIndicator
 
       store = Gtk::ListStore.new(LastPass::Account, String)
       @vault.accounts.sort_by(&:name).each do |account|
-        store.append[0] = account
+        store.append.tap do |iter|
+          iter[0] = account
+          iter[1] = account_name(account)
+        end
       end
 
       @treeview = Gtk::TreeView.new(store)
@@ -19,6 +22,7 @@ module LastPassIndicator
       end
       @treeview.headers_visible = false
       @treeview.signal_connect('row-activated') { done(Gtk::Dialog::RESPONSE_ACCEPT) }
+      @treeview.search_column = 1
 
       scrolled_win = Gtk::ScrolledWindow.new
       scrolled_win.add(@treeview)
