@@ -11,12 +11,12 @@ module LastPassIndicator
       @menu.on_account do |selected_account|
         puts "Asked for #{selected_account}"
         with_vault do |vault|
-          accounts = vault.accounts.select { |account| account.id == selected_account[:id] }
+          accounts = vault.accounts.select { |account| account.id == selected_account.id }
           if accounts.any?
             account = accounts.first
             PasswordOutput.write_password account
           else
-            error_dialog "Unknown account '#{selected_account[:name]}'\nID #{selected_account[:id]} not found"
+            error_dialog "Unknown account '#{selected_account.name}'\nID #{selected_account.id} not found"
           end
         end
       end

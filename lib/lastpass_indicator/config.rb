@@ -35,11 +35,17 @@ module LastPassIndicator
     end
 
     def accounts
-      @config.fetch :accounts, []
+      @config.fetch(:accounts, []).map { |account| Account.from_hash account }
     end
 
-    def accounts=(accounts)
-      @config[:accounts] = accounts
+    def add_account(account)
+      @config[:accounts] ||= []
+      @config[:accounts] << account.to_h
+      save
+    end
+
+    def remove_account(account)
+      @config[:accounts].delete_if { |config_account| config_account[:id] == account.id }
       save
     end
 

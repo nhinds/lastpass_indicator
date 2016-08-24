@@ -21,8 +21,8 @@ module LastPassIndicator
 
     def rebuild_menu
       @indicator.set_menu(Gtk::Menu.new.tap do |menu|
-        @config.accounts.sort_by { |account| account[:name] }.each do |account|
-          menu.append menu_item(account_name(account)) { publish_account(account) }
+        @config.accounts.sort_by(&:name).each do |account|
+          menu.append menu_item(account.to_s) { publish_account(account) }
         end
         menu.append menu_item('Other...') { publish_other }
 
@@ -42,11 +42,6 @@ module LastPassIndicator
       Gtk::MenuItem.new(label).tap do |item|
         item.signal_connect('activate', &block)
       end
-    end
-
-    def account_name(account)
-      return account[:name] if account[:username].nil?
-      "#{account[:name]} (#{account[:username]})"
     end
   end
 end

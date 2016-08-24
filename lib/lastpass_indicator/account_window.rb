@@ -16,13 +16,13 @@ module LastPassIndicator
       @vault.accounts.sort_by(&:name).each do |account|
         store.append.tap do |iter|
           iter[0] = account
-          iter[1] = account_name(account)
+          iter[1] = Account.account_name(account)
         end
       end
 
       @treeview = Gtk::TreeView.new(store)
       @treeview.insert_column(-1, 'Account', Gtk::CellRendererText.new) do |_col, cell, _model, row|
-        cell.text = account_name(row[0])
+        cell.text = row[1]
       end
       @treeview.headers_visible = false
       @treeview.signal_connect('row-activated') { done(Gtk::Dialog::RESPONSE_ACCEPT) }
@@ -50,12 +50,6 @@ module LastPassIndicator
         publish_select(selected_row[0]) unless selected_row.nil?
       end
       @dialog.destroy
-    end
-
-    # FIXME commonize with LoginWindow.account_name
-    def account_name(account)
-      return account.name if account.username.nil? || account.username.empty?
-      "#{account.name} (#{account.username})"
     end
   end
 end

@@ -1,3 +1,4 @@
+require 'lastpass_indicator/account'
 require 'lastpass_indicator/account_window'
 require 'lastpass_indicator/config'
 require 'lastpass_indicator/config_window'

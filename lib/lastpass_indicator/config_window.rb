@@ -12,7 +12,7 @@ module LastPassIndicator
       @vault.accounts.sort_by(&:name).each do |account|
         store.append.tap do |iter|
           iter[0] = account
-          iter[1] = account_name(account)
+          iter[1] = Account.account_name(account)
         end
       end
 
@@ -20,10 +20,10 @@ module LastPassIndicator
       toggle_renderer = Gtk::CellRendererToggle.new
       toggle_renderer.signal_connect('toggled') { |renderer, path| toggled(renderer, path) }
       @treeview.insert_column(-1, 'Shown', toggle_renderer) do |_col, cell, _model, row|
-        cell.active = @config.accounts.any? { |account| account[:id] == row[0].id }
+        cell.active = @config.accounts.any? { |account| account.id == row[0].id }
       end
       @treeview.insert_column(-1, 'Account', Gtk::CellRendererText.new) do |_col, cell, _model, row|
-        cell.text = account_name(row[0])
+        cell.text = row[1]
       end
       @treeview.headers_visible = false
       @treeview.signal_connect('row-activated') { done(Gtk::Dialog::RESPONSE_ACCEPT) }
@@ -48,18 +48,12 @@ module LastPassIndicator
 
     def toggled(renderer, path)
       row = @treeview.model.get_iter path
-      account = { id: row[0].id, name: row[0].name, username: row[0].username }
+      account = Account.from_vault(row[0])
       if renderer.active?
-        @config.accounts -= [account]
+        @config.remove_account account
       else
-        @config.accounts += [account]
+        @config.add_account account
       end
-    end
-
-    # FIXME commonize with AccountWindow.account_name / Menu.account_name
-    def account_name(account)
-      return account.name if account.username.nil? || account.username.empty?
-      "#{account.name} (#{account.username})"
     end
   end
 end
