@@ -12,7 +12,7 @@ module LastPassIndicator
           accounts = vault.accounts.select { |account| account.id == selected_account.id }
           if accounts.any?
             account = accounts.first
-            PasswordOutput.write_password account
+            PasswordOutput.write_password account, @menu
           else
             error_dialog "Unknown account '#{selected_account.name}'\nID #{selected_account.id} not found"
           end
@@ -22,7 +22,7 @@ module LastPassIndicator
         with_vault do |vault|
           account_window = AccountWindow.new(vault)
           account_window.on_select do |account|
-            PasswordOutput.write_password account
+            PasswordOutput.write_password account, @menu
           end
         end
       end
