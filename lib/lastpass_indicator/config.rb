@@ -49,6 +49,15 @@ module LastPassIndicator
       save
     end
 
+    def focus_delay
+      @config[:focus_delay] || 0.5
+    end
+
+    def focus_delay=(focus_delay)
+      @config[:focus_delay] = focus_delay
+      save
+    end
+
     private
 
     def save

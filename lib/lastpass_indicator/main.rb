@@ -6,13 +6,14 @@ module LastPassIndicator
     def initialize
       @config = Config.new
       @menu = Menu.new(@config)
+      @password_output = PasswordOutput.new(@menu, @config)
       @menu.on_account do |selected_account|
         puts "Asked for #{selected_account}"
         with_vault do |vault|
           accounts = vault.accounts.select { |account| account.id == selected_account.id }
           if accounts.any?
             account = accounts.first
-            PasswordOutput.write_password account, @menu
+            @password_output.write_password account
           else
             error_dialog "Unknown account '#{selected_account.name}'\nID #{selected_account.id} not found"
           end
@@ -22,7 +23,7 @@ module LastPassIndicator
         with_vault do |vault|
           account_window = AccountWindow.new(vault)
           account_window.on_select do |account|
-            PasswordOutput.write_password account, @menu
+            @password_output.write_password account
           end
         end
       end

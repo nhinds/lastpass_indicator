@@ -7,6 +7,7 @@ module LastPassIndicator
       @dialog = Gtk::Dialog.new('LastPass Indicator Configuration', nil, nil,
                                 [Gtk::Stock::CLOSE, Gtk::Dialog::RESPONSE_CANCEL])
       @dialog.set_default_size(600, 600)
+      @dialog.vbox.spacing = 5
 
       store = Gtk::ListStore.new(LastPass::Account, String)
       @vault.accounts.sort_by(&:name).each do |account|
@@ -33,6 +34,19 @@ module LastPassIndicator
       scrolled_win.add(@treeview)
       scrolled_win.set_policy(Gtk::POLICY_AUTOMATIC, Gtk::POLICY_AUTOMATIC)
       @dialog.vbox.pack_start(scrolled_win)
+
+      focus_delay_row = Gtk::HBox.new
+      focus_delay_row.tooltip_text = 'The time to pause between selecting the account and typing the password, to allow the window to regain focus'
+
+      focus_delay_label = Gtk::Label.new('Focus Delay (seconds)')
+      focus_delay_label.xalign = 1
+      focus_delay_row.pack_start(focus_delay_label)
+
+      @focus_delay = Gtk::SpinButton.new(0.1, 1.5, 0.1)
+      @focus_delay.value = @config.focus_delay
+      @focus_delay.signal_connect('value-changed') { @config.focus_delay = @focus_delay.value }
+      focus_delay_row.pack_start(@focus_delay, false, false, 5)
+      @dialog.vbox.pack_start(focus_delay_row, false)
 
       @dialog.signal_connect('response') { |_, response| done(response) }
       @dialog.default_response = Gtk::Dialog::RESPONSE_ACCEPT
