@@ -14,6 +14,7 @@ module LastPassIndicator
                                                   'lastpass_indicator',
                                                   AppIndicator::Category::APPLICATION_STATUS,
                                                   THEME_PATH)
+      @indicator.set_attention_icon 'lastpass_indicator_active'
       @indicator.set_status AppIndicator::Status::ACTIVE
       @config.on_save { rebuild_menu }
       rebuild_menu
@@ -32,6 +33,13 @@ module LastPassIndicator
 
         menu.show_all
       end)
+    end
+
+    def mark_active_while
+      @indicator.set_status AppIndicator::Status::ATTENTION
+      yield
+    ensure
+      @indicator.set_status AppIndicator::Status::ACTIVE
     end
 
     private
